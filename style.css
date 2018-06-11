@@ -13,7 +13,7 @@ body {
 }
 
 .map-overlay {
-    font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+    font: 12px/20px 'Roboto Slab', serif;
     position: absolute;
     width: 265px;
     left: 0;
@@ -47,5 +47,6 @@ body {
 
 .leaflet-popup-content-wrapper,
 .leaflet-popup-tip {
+    font-family: 'Roboto', sans-serif; 
     text-align: center;
 }

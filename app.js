@@ -19,8 +19,8 @@ L.tileLayer('https://api.mapbox.com/styles/v1/michelletang/cji9ayg5n2jvo2rlmca26
 var years = ['2016', '2017', '2018'];
 
 function processData(data) {
+
     features = [];
-    // check for valid data
     for (var i = 0; i < data.length; i++) {
         var point = {};
         // check for missing coordinates
@@ -47,28 +47,14 @@ function processData(data) {
 
 map.on('load', function() {
 
-    // define icon class
     var icon = {
         radius: 5,
-        fillColor: '#ea911c',
+        fillColor: '#ef4136',
         color: '#fff',
         weight: 1,
         opacity: 1,
         fillOpacity: 0.8
     };
-
-    // initialize incident layer
-    var incidents = L.geoJson([], {
-        onEachFeature: function(feature, layer) {
-            // add site name tooltip
-            layer.bindPopup(feature.properties.wbname + '<br>' + feature.properties.printyear, {closeButton: false, offset: L.point(0, 0)});
-            layer.on('mouseover', function() { layer.openPopup(); });
-            layer.on('mouseout', function() { layer.closePopup(); });
-        },
-        pointToLayer: function(feature, latlng) {
-            return L.circleMarker(latlng, icon);
-        }
-    }).addTo(map);
 
     // load data from local
     d3.csv('data-clean.csv', function(d) {
@@ -88,9 +74,83 @@ map.on('load', function() {
             printyear : d['Bloom Last Verified']
         };
     }, function(data) {
+
+        function clearFeatures() {
+            map.eachLayer(function(layer) {
+                if( layer instanceof L.GeoJSON )
+                   map.removeLayer(layer);
+            });
+        }
+
+        function filterBy(year) {
+            if (year === '2016') {
+                clearFeatures();
+                incidents2016.addTo(map);
+            } else if (year === '2017') {
+                clearFeatures();
+                incidents2017.addTo(map);
+            } else if (year === '2018') {
+                clearFeatures();
+                incidents2018.addTo(map);
+            }
+            // change filter label
+            document.getElementById('year').textContent = year;
+        }
+
         var incidentData = processData(data);
-        console.log(incidentData);
-        incidents.addData(incidentData);
+
+        // initialize layers
+        var incidents2016 = L.geoJson(incidentData, {
+            filter: function(feature, layer) {
+                return feature.properties.year == '2016';
+            },
+            onEachFeature: function(feature, layer) {
+                layer.bindPopup(feature.properties.wbname + '<br>' + feature.properties.printyear, {closeButton: false, offset: L.point(0, 0)});
+                layer.on('mouseover', function() { layer.openPopup(); });
+                layer.on('mouseout', function() { layer.closePopup(); });
+            },
+            pointToLayer: function(feature, latlng) {
+                return L.circleMarker(latlng, icon);
+            }
+        });
+
+        var incidents2017 = L.geoJson(incidentData, {
+            filter: function(feature, layer) {
+                return feature.properties.year == '2017';
+            },
+            onEachFeature: function(feature, layer) {
+                layer.bindPopup(feature.properties.wbname + '<br>' + feature.properties.printyear, {closeButton: false, offset: L.point(0, 0)});
+                layer.on('mouseover', function() { layer.openPopup(); });
+                layer.on('mouseout', function() { layer.closePopup(); });
+            },
+            pointToLayer: function(feature, latlng) {
+                return L.circleMarker(latlng, icon);
+            }
+        });
+
+        var incidents2018 = L.geoJson(incidentData, {
+            filter: function(feature, layer) {
+                return feature.properties.year == '2018';
+            },
+            onEachFeature: function(feature, layer) {
+                layer.bindPopup(feature.properties.wbname + '<br>' + feature.properties.printyear, {closeButton: false, offset: L.point(0, 0)});
+                layer.on('mouseover', function() { layer.openPopup(); });
+                layer.on('mouseout', function() { layer.closePopup(); });
+            },
+            pointToLayer: function(feature, latlng) {
+                return L.circleMarker(latlng, icon);
+            }
+        });
+
+        // set filter default
+        document.getElementById('slider').value = '2016';
+        filterBy('2016');
+
+        document.getElementById('slider').addEventListener('input', function(e) {
+            var year = e.target.value;
+            filterBy(year);
+        });
+
     });
 
 }).setView([37.270323, -120.612423], 6);

@@ -1,3 +1,14 @@
+/*
+
+California State Water Resources Control Board (SWRCB)
+Office of Information Management and Analysis (OIMA) 
+
+Author: Michelle Tang
+https://github.com/mmtang
+
+*/
+
+
 var map = L.map('map');
 
 L.tileLayer('https://api.mapbox.com/styles/v1/michelletang/cji9ayg5n2jvo2rlmca26xqx5/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWljaGVsbGV0YW5nIiwiYSI6ImNqaTlhbzhrMDBybm8za21sdWlnd2dyOHMifQ.MUXzAlB-Zw6WRJFoFJvqKg', {
@@ -25,7 +36,8 @@ function processData(data) {
                 'region': data[i].region,
                 'wbname': data[i].wbname,
                 'wbtype': data[i].wbtype,
-                'year': data[i].year
+                'year': data[i].year,
+                'printyear' : data[i].printyear
             };
             features.push(point);
         }
@@ -47,7 +59,13 @@ map.on('load', function() {
 
     // initialize incident layer
     var incidents = L.geoJson([], {
-        pointToLayer: function (feature, latlng) {
+        onEachFeature: function(feature, layer) {
+            // add site name tooltip
+            layer.bindPopup(feature.properties.wbname + '<br>' + feature.properties.printyear, {closeButton: false, offset: L.point(0, 0)});
+            layer.on('mouseover', function() { layer.openPopup(); });
+            layer.on('mouseout', function() { layer.closePopup(); });
+        },
+        pointToLayer: function(feature, latlng) {
             return L.circleMarker(latlng, icon);
         }
     }).addTo(map);
@@ -66,10 +84,12 @@ map.on('load', function() {
             region : d['Regional Water Board'],
             wbname : d['Waterbody Name'],
             wbtype : d['Water Body Type'],
-            year: year
+            year: year,
+            printyear : d['Bloom Last Verified']
         };
     }, function(data) {
         var incidentData = processData(data);
+        console.log(incidentData);
         incidents.addData(incidentData);
     });
 

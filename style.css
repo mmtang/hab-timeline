@@ -44,3 +44,8 @@ body {
     margin: 0;
     cursor: ew-resize;
 }
+
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+    text-align: center;
+}

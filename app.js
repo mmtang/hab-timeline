@@ -11,9 +11,10 @@ https://github.com/mmtang
 
 var map = L.map('map');
 
-L.tileLayer('https://api.mapbox.com/styles/v1/michelletang/cji9ayg5n2jvo2rlmca26xqx5/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWljaGVsbGV0YW5nIiwiYSI6ImNqaTlhbzhrMDBybm8za21sdWlnd2dyOHMifQ.MUXzAlB-Zw6WRJFoFJvqKg', {
-    attribution: 'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-    id: 'mapbox://styles/michelletang/cji9ayg5n2jvo2rlmca26xqx5'
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+	attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+	subdomains: 'abcd',
+	maxZoom: 19
 }).addTo(map);
 
 var years = ['2016', '2017', '2018'];
@@ -49,7 +50,7 @@ map.on('load', function() {
 
     var icon = {
         radius: 5,
-        fillColor: '#ef4136',
+        fillColor: '#ef562d',
         color: '#fff',
         weight: 1,
         opacity: 1,

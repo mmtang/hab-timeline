@@ -19,11 +19,11 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
 
 let years = ['2016', '2017', '2018'];
 
-const processData = (data) => {
+const processData = data => {
 
     features = [];
     for (let i = 0; i < data.length; i++) {
-        var point = {};
+        let point = {};
         // check for missing coordinates
         if (!(data[i].longitude) || !(data[i].latitude)) { 
             continue; 
@@ -58,7 +58,7 @@ map.on('load', () => {
     };
 
     // load data from local
-    d3.csv('data-clean.csv', (d) => {
+    d3.csv('data-clean.csv', d => {
         // create a year property value used for filtering
         let parseDate = d3.timeParse('%-m/%-d/%y'),
             date = parseDate(d['Bloom Last Verified']),
@@ -74,16 +74,16 @@ map.on('load', () => {
             year: year,
             printyear : d['Bloom Last Verified']
         };
-    }, (data) => {
+    }, data => {
 
         const clearFeatures = () => {
-            map.eachLayer((layer) => {
+            map.eachLayer(layer => {
                 if( layer instanceof L.GeoJSON )
                    map.removeLayer(layer);
             });
         }
 
-        const filterBy = (year) => {
+        const filterBy = year => {
             if (year === '2016') {
                 clearFeatures();
                 incidents2016.addTo(map);
@@ -135,7 +135,7 @@ map.on('load', () => {
         document.getElementById('slider').value = '2016';
         filterBy('2016');
 
-        document.getElementById('slider').addEventListener('input', (e) => {
+        document.getElementById('slider').addEventListener('input', e => {
             let year = e.target.value;
             filterBy(year);
         });

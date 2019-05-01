@@ -101,26 +101,19 @@ map.on('load', () => {
         }
 
         const filterBy = year => {
-            if (year === '2016') {
-                clearFeatures();
-                incidents2016.addLayer();
-            } else if (year === '2017') {
-                clearFeatures();
-                incidents2017.addLayer();
-            } else if (year === '2018') {
-                clearFeatures();
-                incidents2018.addLayer();
-            }
+            clearFeatures();
+            mapLayers[year].addLayer();
             // change filter label
             document.getElementById('year').textContent = year;
         }
 
-        let incidentData = processData(data);
+        const incidentData = processData(data);
 
         // initialize layers
-        let incidents2016 = new YearLayer(2016, incidentData);
-        let incidents2017 = new YearLayer(2017, incidentData);
-        let incidents2018 = new YearLayer(2018, incidentData);
+        const mapLayers = {};
+        for (let i = 0; i < years.length; i++) {
+            mapLayers[years[i]] = new YearLayer(years[i], incidentData);
+        }
 
         // set filter default
         document.getElementById('slider').value = '2016';

@@ -76,6 +76,23 @@ map.on('load', () => {
         };
     }, data => {
 
+        class YearLayer {
+            constructor(year, data) {
+                this.layer = L.geoJson(data, {
+                    filter: (feature, layer) => feature.properties.year == year,
+                    onEachFeature: (feature, layer) => {
+                        layer.bindPopup(feature.properties.wbname + '<br>' + feature.properties.printyear, {closeButton: false, offset: L.point(0, 0)});
+                        layer.on('mouseover', () => { layer.openPopup(); });
+                        layer.on('mouseout', () => { layer.closePopup(); });
+                    },
+                    pointToLayer: (feature, latlng) => L.circleMarker(latlng, icon)
+                });
+            }
+            addLayer() {
+                this.layer.addTo(map);
+            }
+        }
+
         const clearFeatures = () => {
             map.eachLayer(layer => {
                 if( layer instanceof L.GeoJSON )
@@ -86,13 +103,13 @@ map.on('load', () => {
         const filterBy = year => {
             if (year === '2016') {
                 clearFeatures();
-                incidents2016.addTo(map);
+                incidents2016.addLayer();
             } else if (year === '2017') {
                 clearFeatures();
-                incidents2017.addTo(map);
+                incidents2017.addLayer();
             } else if (year === '2018') {
                 clearFeatures();
-                incidents2018.addTo(map);
+                incidents2018.addLayer();
             }
             // change filter label
             document.getElementById('year').textContent = year;
@@ -101,35 +118,9 @@ map.on('load', () => {
         let incidentData = processData(data);
 
         // initialize layers
-        let incidents2016 = L.geoJson(incidentData, {
-            filter: (feature, layer) => feature.properties.year == '2016',
-            onEachFeature: (feature, layer) => {
-                layer.bindPopup(feature.properties.wbname + '<br>' + feature.properties.printyear, {closeButton: false, offset: L.point(0, 0)});
-                layer.on('mouseover', () => { layer.openPopup(); });
-                layer.on('mouseout', () => { layer.closePopup(); });
-            },
-            pointToLayer: (feature, latlng) => L.circleMarker(latlng, icon)
-        });
-
-        let incidents2017 = L.geoJson(incidentData, {
-            filter: (feature, layer) => feature.properties.year == '2017',
-            onEachFeature: (feature, layer) => {
-                layer.bindPopup(feature.properties.wbname + '<br>' + feature.properties.printyear, {closeButton: false, offset: L.point(0, 0)});
-                layer.on('mouseover', () => { layer.openPopup(); });
-                layer.on('mouseout', () => { layer.closePopup(); });
-            },
-            pointToLayer: (feature, latlng) => L.circleMarker(latlng, icon)
-        });
-
-        let incidents2018 = L.geoJson(incidentData, {
-            filter: (feature, layer) => feature.properties.year == '2018',
-            onEachFeature: (feature, layer) => {
-                layer.bindPopup(feature.properties.wbname + '<br>' + feature.properties.printyear, {closeButton: false, offset: L.point(0, 0)});
-                layer.on('mouseover', () => { layer.openPopup(); });
-                layer.on('mouseout', () => { layer.closePopup(); });
-            },
-            pointToLayer: (feature, latlng) => L.circleMarker(latlng, icon)
-        });
+        let incidents2016 = new YearLayer(2016, incidentData);
+        let incidents2017 = new YearLayer(2017, incidentData);
+        let incidents2018 = new YearLayer(2018, incidentData);
 
         // set filter default
         document.getElementById('slider').value = '2016';

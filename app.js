@@ -9,45 +9,41 @@ https://github.com/mmtang
 */
 
 
-const map = L.map('map');
-
-L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-	attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
-	subdomains: 'abcd',
-	maxZoom: 19
-}).addTo(map);
-
-let years = ['2016', '2017', '2018'];
-
-const processData = data => {
-
-    features = [];
-    for (let i = 0; i < data.length; i++) {
-        let point = {};
-        // check for missing coordinates
-        if (!(data[i].longitude) || !(data[i].latitude)) { 
-            continue; 
-        } else {
-            // convert to geoJSON
-            point.type = 'Feature';
-            point.geometry = {'type': 'Point', 'coordinates': [data[i].longitude, data[i].latitude]};
-            point.properties = { 
-                'county': data[i].count, 
-                'date': data[i].date,
-                'region': data[i].region,
-                'wbname': data[i].wbname,
-                'wbtype': data[i].wbtype,
-                'year': data[i].year,
-                'printyear' : data[i].printyear
-            };
-            features.push(point);
-        }
-    }
-    return features;
+const initializeMap = () => {
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        subdomains: 'abcd',
+        maxZoom: 19
+    }).addTo(map);
 }
 
-map.on('load', () => {
+const getData = config => {
+    $.ajax({
+        type: 'GET',
+        url: config.url,
+        dataType: 'jsonp',
+        success: function(res) {
+            // config.success(res, config);
+            config.success(res.result.records);
+        },
+        error: function(xhr, textStatus, error) {
+            console.log(xhr.statusText);
+            console.log(textStatus);
+            console.log(error);
+        }
+    });
+}
 
+
+const processData = data => {
+    features = [];
+    console.log(data);
+}
+
+const map = L.map('map');
+
+map.on('load', () => {
+    let years = ['2016', '2017', '2018'];
     let icon = {
         radius: 5,
         fillColor: '#ef562d',
@@ -57,6 +53,15 @@ map.on('load', () => {
         fillOpacity: 0.8
     };
 
+    const config = {
+        url: 'https://data.ca.gov/api/action/datastore/search.jsonp?resource_id=9332c877-98cf-4e34-95e9-20ca0f7741b4&limit=500',
+        success: processData
+    };
+
+    initializeMap();
+    getData(config);
+
+    /*
     // load data from local
     d3.csv('data-clean.csv', d => {
         // create a year property value used for filtering
@@ -125,6 +130,7 @@ map.on('load', () => {
         });
 
     });
+    */
 
 }).setView([37.270323, -120.612423], 6);
 

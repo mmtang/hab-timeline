@@ -9,6 +9,8 @@ https://github.com/mmtang
 */
 
 
+const map = L.map('map');
+
 const initializeMap = () => {
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
@@ -18,32 +20,39 @@ const initializeMap = () => {
 }
 
 const getData = config => {
-    $.ajax({
-        type: 'GET',
-        url: config.url,
-        dataType: 'jsonp',
-        success: function(res) {
-            // config.success(res, config);
-            config.success(res.result.records);
-        },
-        error: function(xhr, textStatus, error) {
-            console.log(xhr.statusText);
-            console.log(textStatus);
-            console.log(error);
-        }
-    });
+    return new Promise((resolve, reject) => {
+        $.ajax({
+            type: 'GET',
+            url: config.url,
+            dataType: 'jsonp',
+            success: function(response) {
+                resolve(response);
+            },
+            error: function(xhr, textStatus, error) {
+                console.log(xhr.statusText);
+                console.log(textStatus);
+                console.log(error);
+                reject(error);
+            }
+        });
+    })
 }
-
 
 const processData = data => {
-    features = [];
-    console.log(data);
+    const records = (data.result.records).map((d) => {
+        return {
+            bloomlastverifiedon: new Date(d['bloomlastverifiedon']),
+            incidentinformation: d['incidentinformation'],
+            latitude: +d['latitude'],
+            longitude: +d['longitude'],
+            observationdate: new Date(d['observationdate']),
+            waterbodyname: d['waterbodyname']
+        };
+    });
+    return records;
 }
 
-const map = L.map('map');
-
 map.on('load', () => {
-    let years = ['2016', '2017', '2018'];
     let icon = {
         radius: 5,
         fillColor: '#ef562d',
@@ -55,11 +64,15 @@ map.on('load', () => {
 
     const config = {
         url: 'https://data.ca.gov/api/action/datastore/search.jsonp?resource_id=9332c877-98cf-4e34-95e9-20ca0f7741b4&limit=500',
-        success: processData
+        success: processData,
     };
 
     initializeMap();
-    getData(config);
+    getData(config)
+        .then(response => processData(response))
+        .then(response => console.log(response))
+        .catch(error => console.log(error));
+    
 
     /*
     // load data from local
